@@ -78,6 +78,7 @@ function results = NavSuite()
         exp.mx + (exp.navButtonWidth * 1.5) + areaPadding, ...
         exp.scrRect(4) - areaPadding];
     
+    % ===== EXPERIMENT PARAMETERS =====
     exp.pathColors = {
         [178 220 239] % Light blue
         [49 162 242] % Medium blue
@@ -90,39 +91,73 @@ function results = NavSuite()
         [157 157 157] % Gray
     };
 
+    % path graphical parameters
     exp.pathNodeSize = 8;
     exp.pathNodeOutlineSize = 11;
     exp.pathNodeOutlineWeight = 3;
     exp.pathWeight = 2;
-    exp.pathScale = 4000;
     
     % probability of a positive trial
-    exp.probPositive = 0.5;
+    exp.probPositive = 0.33;
     
-    % Alert data
+    % maximum number of nodes to generate between alert presentations
+    % you shouldn't need to change this
+    exp.nodesPerTrial = 50;
+    
+    % Alert data (these files should be in the alerts subdirectory)
+    % First column are .jpg (image) files; second column are .wav (sound)
+    % files.
     exp.alertConditions = { ...
-        'High Vis.jpg', '','HIGH'; ...
-        'Low Vis.jpg', '','LOW'; ...
-        '', 'High Aud.wav','HIGH'; ...
-        '', 'Low Aud.wav','LOW'; ...
-        '', 'High Tac.wav','HIGH'; ...
-        '', 'Low Tac.wav','LOW'; ...
-        'High Vis.jpg', 'High Aud.wav','HIGH'; ...
-        'Low Vis.jpg', 'Low Aud.wav','LOW'; ...
-        'High Vis.jpg', 'High Tac.wav','HIGH'; ...
-        'Low Vis.jpg', 'Low Tac.wav','LOW'; ...
-        '', 'High TacAud.wav','HIGH'; ...
-        '', 'Low TacAud.wav','LOW'};
-
+        '', 'High Aud.wav'; ...
+        '', 'Low Aud.wav'; ...
+        '', 'High Tac.wav'; ...
+        '', 'Low Tac.wav'; ...
+        '', 'High TacAud.wav'; ...
+        '', 'Low TacAud.wav'};
+    
+    % Number of times to repeat alerts
+    exp.alertBlocks = 2;
+    
+    % Alert timing parameters
+    % Formula is as follows:
+    %
+    % nextAlert = now + base + (jitter * random( 0.0 -> 1.0 ))
+    %
+    % i.e., the next alert will happen in at least (base) seconds plus
+    % UP TO jitter seconds.
+    exp.initialAlertDelayBase = 30;
+    exp.initialAlertDelayJitter = 10;
+    exp.alertDelayBase = 10;
+    exp.alertDelayJitter = 10;
+    
+    % <DO NOT EDIT>
+    exp.alertOrder = [];
+    for i=1:exp.alertBlocks
+        order = shuffle(1:size(exp.alertConditions,1));
+        exp.alertOrder = [exp.alertOrder order];
+    end
+    exp.orderIndex = 1;
+    % </DO NOT EDIT>
+    
     % Create nodes and reset nav task state
-    genNodes(50);
+    genNodes(exp.nodesPerTrial);
     
     % Schedule the first alert; future alerts are scheduled dynamically
     % after each alert response
-    scheduleAlert(7, 30 + rand() * 10); % 30 + up to 10 seconds after task start
+    scheduleAlert(exp.alertOrder(1), ...
+        exp.initialAlertDelayBase + rand() * exp.initialAlertDelayJitter);
     
     logEvent(sprintf('StartExperiment,%s,%d',exp.participantNumber,exp.nLevel));
     
+    % Button labels used in serialReceive.m
+    % These should reflect your mappings in the Logitech Profiler
+    % on the sim computer -- OR ELSE!!!
+    exp.btn1Label = 'x';
+    exp.btn2Label = 'square';
+    exp.btn3Label = 'round';
+    exp.btn4Label = 'triangle';
+    exp.brakeLabel = 'brake'; % DO NOT CHANGE
+
     % Main loop
     while(exp.state ~= exp.STOP)
         timeNow = GetSecs();

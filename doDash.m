@@ -15,8 +15,8 @@ function doDash()
         exp.triggerAlert = false;
         exp.alertPresent = true;
         alertInfo = exp.alertConditions(exp.alertIndex,:);
-        logEvent(sprintf('AlertOnset,%s,%s,%s', ...
-            alertInfo{1},alertInfo{2},alertInfo{3}));
+        logEvent(sprintf('AlertOnset,%s,%s', ...
+            alertInfo{1},alertInfo{2}));
         %exp.nodeIndex = -1; % Clears nav task
         exp.redraw = true;
     elseif(exp.alertResponded)
@@ -28,7 +28,12 @@ function doDash()
         exp.alertResponded = false;
         exp.alertPresent = false;
         exp.alertResponse = '';
-        resetTaskAndAlert();
+        exp.orderIndex = exp.orderIndex + 1;
+        if(exp.orderIndex > length(exp.alertOrder))
+            exp.state = exp.STOP;
+        else
+            resetTaskAndAlert();
+        end
     end
     
     if(exp.redrawDash)
@@ -43,5 +48,6 @@ function resetTaskAndAlert()
     
     genNodes(50);
     exp.redraw = true;
-    scheduleAlert(randi(length(exp.alertConditions)), 20 + (rand() * 10));
+    scheduleAlert(exp.alertOrder(exp.orderIndex), ...
+        exp.alertDelayBase + (rand() * exp.alertDelayJitter));
 end

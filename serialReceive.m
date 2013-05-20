@@ -14,19 +14,18 @@ function serialReceive(obj, event)
         exp.alertResponded = true;
         switch(cmd)
             case 1
-                exp.alertResponse = 'x';
+                exp.alertResponse = exp.btn1Label;
             case 2
-                exp.alertResponse = 'square';
+                exp.alertResponse = exp.btn2Label;
             case 4
-                exp.alertResponse = 'round';
+                exp.alertResponse = exp.btn3Label;
             case 8
-                exp.alertResponse = 'triangle';
+                exp.alertResponse = exp.btn4Label;
             case 16
-                exp.alertResponse = 'brake';
+                exp.alertResponse = exp.brakeLabel;
             otherwise
                 exp.alertResponse = 'unknown';
         end
-        logEvent(['ResponseReceived,',exp.alertResponse]);
     elseif(cmd == 32) % Right shoulder
         exp.taskResponded = true;
         exp.taskResponse = 'positive';
